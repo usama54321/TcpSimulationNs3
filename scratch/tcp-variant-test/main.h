@@ -11,10 +11,12 @@
 #include "ns3/event-id.h"
 #include "ns3/flow-monitor-helper.h"
 #include "ns3/ipv4-global-routing-helper.h"
+#include "ns3/point-to-point-layout-module.h"
 
 using namespace ns3;
 using namespace std;
 
 int main(int, char **);
-ApplicationContainer initClientApp(Ptr<Node> client, AddressValue remoteAddress);
+ApplicationContainer initClientApp(Ptr<Node> client, Ipv4Address, uint16_t);
 ApplicationContainer initServerApplication(Ptr<Node> server, unsigned port);
+inline double round(double);
