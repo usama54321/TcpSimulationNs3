@@ -104,14 +104,17 @@ int main(int argc, char *argv[]) {
 
     TypeId tid = TypeId::LookupByName ("ns3::TcpCubic");
 
-    unsigned estimated_rtt = 2 * DELAY/1000;
-    unsigned megabitToBytes = 125000;
+    //float estimated_rtt = 2 * DELAY/1000.0;
+    //unsigned megabitToBytes = 125000;
 
     //Establish bottleneck link
     PointToPointHelper bottleneckLink;
+    NS_LOG_LOGIC("Bandwidth :" + to_string(BW));
     bottleneckLink.SetDeviceAttribute ("DataRate", StringValue (to_string(BW) + "Mbps"));
     bottleneckLink.SetChannelAttribute("Delay", StringValue(to_string(DELAY) + "ms"));
-    bottleneckLink.SetQueue("ns3::DropTailQueue","Mode",EnumValue(DropTailQueue<Packet>::QUEUE_MODE_BYTES),"MaxBytes",UintegerValue (megabitToBytes * BW * estimated_rtt));
+    //NS_LOG_LOGIC("Queue Size :" + to_string(megabitToBytes * BW * estimated_rtt));
+    //TODO queue size infinite for now
+    bottleneckLink.SetQueue("ns3::DropTailQueue","Mode",EnumValue(DropTailQueue<Packet>::QUEUE_MODE_BYTES),"MaxBytes",UintegerValue (999999999));
 
     auto bottleneckLinkDevices = bottleneckLink.Install(router);
     auto bottleneckInterfaces = address.Assign(bottleneckLinkDevices);
@@ -128,6 +131,7 @@ int main(int argc, char *argv[]) {
 
     Ipv4InterfaceContainer serverInterfaces;
     //for now NUM_CLIENTS = 2
+    NS_LOG_LOGIC("Number of clients " + to_string(NUM_CLIENTS));
     for(unsigned i = 0; i < NUM_CLIENTS; i++) {
         PointToPointHelper connections;
         string rate;
@@ -139,6 +143,7 @@ int main(int argc, char *argv[]) {
         address.NewNetwork();
 
         PointToPointHelper serverConnection;
+        serverConnection.SetDeviceAttribute ("DataRate", StringValue("5Mbps"));
         auto serverDevices = serverConnection.Install(router.Get(1), servers.Get(i));
         auto serverInterface = address.Assign(serverDevices);
         serverInterfaces.Add(serverInterface.Get(1));
@@ -185,8 +190,8 @@ int main(int argc, char *argv[]) {
             tid = TypeId::LookupByName ("ns3::TcpReno");
         }
  
-        Config::Set ("/NodeList/" + to_string(servers.Get(i)->GetId()) +"/$ns3::TcpL4Protocol/SocketType", TypeIdValue (tid));
         ApplicationContainer serverAppCubic = initServerApplication(servers.Get(i), PORT + i);
+        Config::Set ("/NodeList/" + to_string(servers.Get(i)->GetId()) +"/$ns3::TcpL4Protocol/SocketType", TypeIdValue (tid));
         //AddressValue remoteAddressCubic (InetSocketAddress (serverInterfaces.GetAddress(i,0), PORT+i));
 
         serverAppCubic.Start (Seconds (START_TIME));
@@ -245,7 +250,7 @@ int main(int argc, char *argv[]) {
 ApplicationContainer initClientApp(Ptr<Node> client, Ipv4Address address, uint16_t port) {
     TcpClientHelper ftp (address, port);
     //AttributeValue temp = 1;
-    ftp.SetAttribute ("MaxPackets", UintegerValue(1));
+    ftp.SetAttribute ("MaxPackets", UintegerValue(99999999));
     return ftp.Install (client);
 }
 
