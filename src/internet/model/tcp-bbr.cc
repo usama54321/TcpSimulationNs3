@@ -92,25 +92,49 @@ TcpBbr::TcpBbr(void) :
 // Copy constructor.
 TcpBbr::TcpBbr(const TcpBbr &sock) :
   TcpCongestionOps(sock),
-  m_pacing_gain(0.0),
-  m_cwnd_gain(0.0),
-  m_round(0),
-  m_delivered(0),
-  m_next_round_delivered(0),
-  m_bytes_in_flight(0),
-  m_min_rtt_change(Time(0)),
-  m_cwnd(0.0),
-  m_prior_cwnd(0.0), 
-  m_packet_conservation(Time(0)),
-  m_in_retrans_seq(false),
-  m_retrans_seq(0),
-  m_machine(this),
-  m_state_startup(this),
-  m_state_drain(this),
-  m_state_probe_bw(this),
-  m_state_probe_rtt(this) {  
+  m_pacing_gain(sock.m_pacing_gain),
+  m_cwnd_gain(sock.m_cwnd_gain),
+  m_round(sock.m_round),
+  m_delivered(sock.m_delivered),
+  m_next_round_delivered(sock.m_next_round_delivered),
+  m_bytes_in_flight(sock.m_bytes_in_flight),
+  m_min_rtt_change(sock.m_min_rtt_change),
+  m_cwnd(sock.m_cwnd),
+  m_prior_cwnd(sock.m_prior_cwnd), 
+  m_packet_conservation(sock.m_packet_conservation),
+  m_in_retrans_seq(sock.m_in_retrans_seq),
+  m_retrans_seq(sock.m_retrans_seq),
+  m_machine(sock.m_machine),
+  m_state_startup(sock.m_state_startup),
+  m_state_drain(sock.m_state_drain),
+  m_state_probe_bw(sock.m_state_probe_bw),
+  m_state_probe_rtt(sock.m_state_probe_rtt) {  
+      //correct owner
+      m_machine.setOwner(this);
+      m_state_startup.setOwner(this);
+      m_state_drain.setOwner(this);
+      m_state_probe_bw.setOwner(this);
+      m_state_probe_rtt.setOwner(this);
+      switch (sock.m_machine.getStateType()) {
+        case bbr::STARTUP_STATE:
+            m_machine.setState(&m_state_startup);
+            break;
+        case bbr::DRAIN_STATE:
+            m_machine.setState(&m_state_drain);
+            break;
+        case bbr::PROBE_BW_STATE:
+            m_machine.setState(&m_state_probe_bw);
+            break;
+        case bbr::PROBE_RTT_STATE:
+            m_machine.setState(&m_state_probe_rtt);
+            break;
+        default:
+            break;
+      }
+
   NS_LOG_FUNCTION("[copy constructor]" << this << &sock);
-}
+  }
+  //m_machine.setState(&
 
 // Default destructor.
 TcpBbr::~TcpBbr(void) {

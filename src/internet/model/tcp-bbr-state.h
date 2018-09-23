@@ -52,6 +52,10 @@ class BbrStateMachine : public Object {
   // Update by executing current state.
   void update();
 
+  BbrStateMachine(const BbrStateMachine &);
+
+  void setOwner(TcpBbr *);
+  void setState(BbrState *);
  private:
   BbrState *m_state;           // Current state.
   TcpBbr *m_owner;             // BBR' flow that owns machine.
@@ -87,6 +91,8 @@ class BbrState : public Object {
   // Invoked when state exited.
   virtual void exit();
 
+  BbrState(const BbrState &);
+  void setOwner(TcpBbr *);
  protected:
   TcpBbr *m_owner;             // BBR' flow that owns state.
 };
@@ -115,7 +121,8 @@ class BbrStartupState : public BbrState {
 
   // Invoked when state updated.
   void execute();
-
+  
+  BbrStartupState(const BbrStartupState &);
  private:
   double m_full_bw;                        // Max prev BW in STARTUP.
   int m_full_bw_count;                     // Times BW not grown in STARTUP.
@@ -145,6 +152,7 @@ class BbrDrainState : public BbrState {
 
   // Invoked when state updated.
   void execute();
+  BbrDrainState(const BbrDrainState &);
 
  private:
   uint32_t m_inflight_limit; // Target bytes in flight to exit DRAIN state.
@@ -175,7 +183,7 @@ class BbrProbeBWState : public BbrState {
 
   // Invoked when state updated.
   void execute();
-
+  BbrProbeBWState(const BbrProbeBWState &);
  private:
   int m_gain_cycle;                        // For cycling gain in PROBE_BW.
 };
@@ -205,6 +213,7 @@ class BbrProbeRTTState : public BbrState {
   // Invoked when state updated.
   void execute();
 
+  BbrProbeRTTState(const BbrProbeRTTState &);
  private:
   Time m_probe_rtt_time;     // Time to remain in PROBE_RTT.
 };

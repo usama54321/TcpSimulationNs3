@@ -36,6 +36,48 @@ NS_OBJECT_ENSURE_REGISTERED(BbrState);
 // |      +----+      |
 // |                  |
 // +---- PROBE_RTT <--+
+BbrProbeRTTState::BbrProbeRTTState(const BbrProbeRTTState& old) {
+    m_owner = old.m_owner;
+    m_probe_rtt_time = old.m_probe_rtt_time;
+}
+
+BbrProbeBWState::BbrProbeBWState(const BbrProbeBWState &old) {
+    m_gain_cycle = old.m_gain_cycle;
+    m_owner = old.m_owner;
+}
+
+BbrDrainState::BbrDrainState(const BbrDrainState &old) {
+    m_owner = old.m_owner;
+    m_inflight_limit = old.m_inflight_limit;
+    m_round_count = old.m_round_count;
+}
+
+BbrStartupState::BbrStartupState(const BbrStartupState &old) {
+    m_owner = old.m_owner;
+    m_full_bw = old.m_full_bw;
+    m_full_bw_count = old.m_full_bw_count;
+}
+
+void BbrState::setOwner(TcpBbr *o) {
+    m_owner = o;
+}
+
+BbrState::BbrState(const BbrState &old) {
+    m_owner = old.m_owner;
+}
+
+BbrStateMachine::BbrStateMachine(const BbrStateMachine &old) {
+    m_state = old.m_state;
+    m_owner = old.m_owner;
+}
+
+void BbrStateMachine::setState(BbrState *s) {
+    m_state = s;
+}
+
+void BbrStateMachine::setOwner(TcpBbr *o) {
+    m_owner = o;
+}
 
 // Default constructor.
 BbrStateMachine::BbrStateMachine() {
